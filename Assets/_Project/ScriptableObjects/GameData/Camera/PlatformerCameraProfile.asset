@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60e884f06224e444da21452c0c7c0733, type: 3}
+  m_Name: PlatformerCameraProfile
+  m_EditorClassIdentifier: 
+  <Priority>k__BackingField: 10
+  <BlendTime>k__BackingField: 1
+  <FieldOfView>k__BackingField: 60
+  <SideAngle>k__BackingField: 10
+  <FollowOffset>k__BackingField: {x: 0, y: 3, z: -8}
+  <LookOffset>k__BackingField: {x: 0, y: 1.5, z: 0}
+  <FollowSmoothing>k__BackingField: 10
+  <RotationSmoothing>k__BackingField: 8
+  <EnableLookAhead>k__BackingField: 1
+  <LookAheadDistance>k__BackingField: 3
+  <LookAheadSmoothing>k__BackingField: 5
+  <UseBounds>k__BackingField: 0
+  <MinBounds>k__BackingField: {x: -50, y: 0, z: -50}
+  <MaxBounds>k__BackingField: {x: 50, y: 100, z: 50}

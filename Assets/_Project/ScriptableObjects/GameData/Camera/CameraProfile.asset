@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e5bee5772bda034ab8c96686d87b80a, type: 3}
+  m_Name: CameraProfile
+  m_EditorClassIdentifier: 
+  <Priority>k__BackingField: 10
+  <BlendTime>k__BackingField: 0.5
+  <FollowOffset>k__BackingField: {x: 0, y: 2, z: -5}
+  <FollowDamping>k__BackingField: 1
+  <UseLookTarget>k__BackingField: 1
+  <FieldOfView>k__BackingField: 60
+  <LookSensitivityX>k__BackingField: 0.05
+  <LookSensitivityY>k__BackingField: 1.09
+  <LookSmoothing>k__BackingField: 1
+  <MinPitch>k__BackingField: -80
+  <MaxPitch>k__BackingField: 80
+  <EnableHeadBob>k__BackingField: 1
+  <BobFrequency>k__BackingField: 10
+  <BobHorizontalAmplitude>k__BackingField: 0.05
+  <BobVerticalAmplitude>k__BackingField: 0.08
+  <EnableLandingImpact>k__BackingField: 1
+  <LandingImpactAmount>k__BackingField: 0.2
+  <LandingRecoverySpeed>k__BackingField: 5

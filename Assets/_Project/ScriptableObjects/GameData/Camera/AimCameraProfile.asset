@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 634212b5e03bd1949994af7e36e78e45, type: 3}
+  m_Name: AimCameraProfile
+  m_EditorClassIdentifier: 
+  <Priority>k__BackingField: 10
+  <BlendTime>k__BackingField: 1
+  <FieldOfView>k__BackingField: 60
+  <Offset>k__BackingField: {x: 0, y: 0, z: 0}
+  <AttachmentPoint>k__BackingField: HeadRoot
+  <RotationDamping>k__BackingField: 0.1
+  <LookSensitivityX>k__BackingField: 0.3
+  <LookSensitivityY>k__BackingField: 0.3
+  <MinPitch>k__BackingField: -60
+  <MaxPitch>k__BackingField: 60
+  <EnableCollision>k__BackingField: 1
+  <CollisionRadius>k__BackingField: 0.2
+  <MinDistance>k__BackingField: 1
+  <CollisionLayers>k__BackingField:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  <DynamicFOV>k__BackingField: 0
+  <SprintFOV>k__BackingField: 70
+  <AimFOV>k__BackingField: 40
+  <FOVTransitionSpeed>k__BackingField: 5

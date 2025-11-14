@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 511bcdc2566d92049ae4df74b0714f8d, type: 3}
+  m_Name: SideScrollerCameraProfile
+  m_EditorClassIdentifier: 
+  <Priority>k__BackingField: 10
+  <BlendTime>k__BackingField: 1
+  <FieldOfView>k__BackingField: 60
+  <IsOrthographic>k__BackingField: 1
+  <OrthographicSize>k__BackingField: 5.86
+  <FixedRotation>k__BackingField: {x: 0, y: 0, z: 0}
+  <CameraDistance>k__BackingField: -23.86
+  <LockZPosition>k__BackingField: 1
+  <FixedZPosition>k__BackingField: -4.69
+  <FollowSmoothing>k__BackingField: 19.22
+  <UseDeadzone>k__BackingField: 1
+  <DeadzoneWidth>k__BackingField: 2.31
+  <DeadzoneHeight>k__BackingField: 1
+  <UseLookAhead>k__BackingField: 1
+  <LookAheadDistance>k__BackingField: 3.82
+  <LookAheadSmoothing>k__BackingField: 3
+  <LookAheadThreshold>k__BackingField: 0.5
+  <UseBounds>k__BackingField: 0
+  <MinBounds>k__BackingField: {x: -50, y: -10}
+  <MaxBounds>k__BackingField: {x: 50, y: 20}
