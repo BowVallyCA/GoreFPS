@@ -11,6 +11,8 @@ public class HoldObjectScript : MonoBehaviour
     private Camera playerCamera;
     private Rigidbody heldObject;
 
+    [SerializeField] private Vector3 holdOffset = new Vector3(0.3f, -0.3f, 1f);
+
     void Start()
     {
         playerCamera = Camera.main;
@@ -22,35 +24,35 @@ public class HoldObjectScript : MonoBehaviour
     {
         if (heldObject != null)
         {
-            // Make the hold point follow where the camera is looking
-            Vector3 targetPosition = playerCamera.transform.position + playerCamera.transform.forward * Vector3.Distance(playerCamera.transform.position, holdPoint.position);
+            // World-space offset from camera
+            Vector3 offsetWorld = playerCamera.transform.TransformDirection(holdOffset);
 
-            // Smoothly move and rotate held object to that position/orientation
+            // Offset position beside the camera view
+            Vector3 targetPosition = playerCamera.transform.position + offsetWorld;
+
+            // Move object
             heldObject.MovePosition(targetPosition);
-            heldObject.MoveRotation(Quaternion.LookRotation(playerCamera.transform.forward));
+
+            // Rotate weapon to match the camera's exact aiming direction
+            heldObject.MoveRotation(Quaternion.LookRotation(playerCamera.transform.forward, playerCamera.transform.up));
         }
     }
 
     public void TryPickup()
     {
-        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
-        if (Physics.Raycast(ray, out RaycastHit hit, pickupRange))
-        {
-            if (hit.collider.CompareTag(pickableTag))
-            {
-                Rigidbody rb = hit.collider.GetComponent<Rigidbody>();
-                if (rb != null)
-                {
-                    heldObject = rb;
-                    heldObject.useGravity = false;
-                    heldObject.linearDamping = 10f;
-
-                    // Offset so it sits below the camera view
-                    Vector3 belowCameraOffset = playerCamera.transform.forward * 0.8f - playerCamera.transform.up * 0.5f;
-                    heldObject.transform.position = playerCamera.transform.position + belowCameraOffset;
-                    heldObject.transform.rotation = Quaternion.LookRotation(playerCamera.transform.forward);
-                }
-            }
+        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward); 
+        if (Physics.Raycast(ray, out RaycastHit hit, pickupRange)) 
+        { 
+            if (hit.collider.CompareTag(pickableTag)) 
+            { 
+                Rigidbody rb = hit.collider.GetComponent<Rigidbody>(); 
+                if (rb != null) 
+                { heldObject = rb; heldObject.useGravity = false; 
+                  heldObject.linearDamping = 10f; 
+                  heldObject.transform.position = holdPoint.position; 
+                  heldObject.transform.rotation = holdPoint.rotation; 
+                } 
+            } 
         }
     }
 

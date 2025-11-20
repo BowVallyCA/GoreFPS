@@ -6,6 +6,8 @@ public class HealthScript : MonoBehaviour
 {
     public static event Action<int> OnHealthChanged;
 
+    //private UiManager uiManager;
+
     [Header("Health Settings")]
     public int maxHealth = 100;
     public int currentHealth;
@@ -14,6 +16,7 @@ public class HealthScript : MonoBehaviour
     {
         currentHealth = maxHealth;
         OnHealthChanged?.Invoke(currentHealth);
+        //uiManager = GetComponent<UiManager>();
     }
 
     public void TakeDamage(int amount)
@@ -35,6 +38,7 @@ public class HealthScript : MonoBehaviour
         currentHealth += amount;
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
         OnHealthChanged?.Invoke(currentHealth);
+        //uiManager.GreenFlash();
     }
 
     protected virtual void Die()
