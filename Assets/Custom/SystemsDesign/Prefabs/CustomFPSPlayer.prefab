@@ -128,7 +128,7 @@ MonoBehaviour:
   _checkDistance: 0.3
   _groundLayers:
     serializedVersion: 2
-    m_Bits: 55
+    m_Bits: 4294967295
 --- !u!114 &8896943995836258192
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -269,6 +269,7 @@ MonoBehaviour:
   pickupRange: 3
   holdPoint: {fileID: 930280998916638394}
   throwForce: 10
+  holdOffset: {x: 0.3, y: -0.3, z: 1}
 --- !u!114 &8771428737519958070
 MonoBehaviour:
   m_ObjectHideFlags: 0
