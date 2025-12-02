@@ -6,7 +6,7 @@ public class HealthScript : MonoBehaviour
 {
     public static event Action<int> OnHealthChanged;
 
-    //private UiManager uiManager;
+    [SerializeField] private Animator flashAnimator;
 
     [Header("Health Settings")]
     public int maxHealth = 100;
@@ -38,7 +38,7 @@ public class HealthScript : MonoBehaviour
         currentHealth += amount;
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
         OnHealthChanged?.Invoke(currentHealth);
-        //uiManager.GreenFlash();
+        flashAnimator.Play("GreenFlash");
     }
 
     protected virtual void Die()

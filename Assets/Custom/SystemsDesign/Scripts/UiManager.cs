@@ -10,7 +10,6 @@ public class UiManager : MonoBehaviour
     [SerializeField] public TMP_Text nearDeathText;
     [SerializeField] public TMP_Text countdownText;
     [SerializeField] public Image loseScreen;
-    [SerializeField] private Animator flashAnimator;
 
     [Header("Blood Overlay")]
     [Tooltip("UI Image placed on top of the screen (full-screen) that contains a semi-transparent blood/splatter sprite.")]
@@ -110,7 +109,10 @@ public class UiManager : MonoBehaviour
                 StopCoroutine(pulseCoroutine);
                 pulseCoroutine = null;
             }
+
         }
+
+
     }
 
     private void NearDeath()
@@ -258,10 +260,5 @@ public class UiManager : MonoBehaviour
         Color c = img.color;
         c.a = Mathf.Clamp01(alpha);
         img.color = c;
-    }
-
-    public void GreenFlash()
-    {
-        flashAnimator.Play("GreenFlash");
     }
 }
