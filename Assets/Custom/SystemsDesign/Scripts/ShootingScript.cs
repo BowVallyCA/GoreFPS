@@ -1,11 +1,10 @@
 using UnityEngine;
+using UnityEngine.VFX;
 using _Project.Code.Core.Events;
 using _Project.Code.Gameplay.Input;
 
 public class ShootingScript : MonoBehaviour
 {
-    //[SerializeField] private ParticleSystem particleEffect;
-
     private HoldObjectScript holdManager;
 
     void Start()
@@ -13,11 +12,6 @@ public class ShootingScript : MonoBehaviour
         holdManager = GetComponent<HoldObjectScript>();
         EventBus.Instance.Subscribe<AttackInputEvent>(this, HandleFire);
     }
-
-    //void OnDestroy()
-    //{
-    //    EventBus.Instance.Unsubscribe<AttackInputEvent>(HandleFire);
-    //}
 
     void HandleFire(AttackInputEvent input)
     {
@@ -29,20 +23,20 @@ public class ShootingScript : MonoBehaviour
         }
 
         FleshCube gun = held.GetComponent<FleshCube>();
-        ParticleSystem particleEffect = held.GetComponentInChildren<ParticleSystem>();
+        VisualEffect vfx = held.GetComponentInChildren<VisualEffect>();
+
         if (gun != null)
         {
             gun.Shoot();
 
-            // Play the particle effect
-            if (particleEffect != null)
+            if (vfx != null)
             {
-                particleEffect.Play();
-                Debug.Log("Particle play");
+                vfx.Play();
+                Debug.Log("VFX play");
             }
             else
             {
-                Debug.Log("No Particle");
+                Debug.Log("No VFX component found");
             }
         }
         else
