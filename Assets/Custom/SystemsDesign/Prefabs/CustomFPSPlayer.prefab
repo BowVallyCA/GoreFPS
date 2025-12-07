@@ -41,17 +41,18 @@ GameObject:
   m_Component:
   - component: {fileID: 7151019881020149150}
   - component: {fileID: 7827897331440177065}
+  - component: {fileID: 7923314494458330996}
   - component: {fileID: 3260409599806308293}
   - component: {fileID: 5503264342981369574}
   - component: {fileID: 8896943995836258192}
-  - component: {fileID: 7923314494458330996}
-  - component: {fileID: 8857824793741429987}
-  - component: {fileID: 3628947397788478182}
   - component: {fileID: 8771428737519958070}
-  - component: {fileID: 7957575375373463061}
+  - component: {fileID: 3628947397788478182}
+  - component: {fileID: 8857824793741429987}
+  - component: {fileID: 5747405295132617269}
+  - component: {fileID: 228927527542658957}
   m_Layer: 3
   m_Name: CustomFPSPlayer
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -100,48 +101,6 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &3260409599806308293
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5675074895673688394}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1fcce294221aede48a3d9c8c27b7493f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &5503264342981369574
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5675074895673688394}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d22a3becd26f2b40a9078d3c13ec238, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  <GroundCheckOrigin>k__BackingField: {fileID: 4476159927535129493}
-  _checkDistance: 0.3
-  _groundLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
---- !u!114 &8896943995836258192
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5675074895673688394}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 54567d34911b115428f7579c703b540f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  <MovementProfile>k__BackingField: {fileID: 11400000, guid: df501f85e39040c4b8292a4d16a0ae0a, type: 2}
 --- !u!82 &7923314494458330996
 AudioSource:
   m_ObjectHideFlags: 0
@@ -239,7 +198,7 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &8857824793741429987
+--- !u!114 &3260409599806308293
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -248,11 +207,51 @@ MonoBehaviour:
   m_GameObject: {fileID: 5675074895673688394}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 89001a551b406e542bd801b667d2ed17, type: 3}
+  m_Script: {fileID: 11500000, guid: 1fcce294221aede48a3d9c8c27b7493f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
-  currentHealth: 0
+--- !u!114 &5503264342981369574
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5675074895673688394}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d22a3becd26f2b40a9078d3c13ec238, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <GroundCheckOrigin>k__BackingField: {fileID: 4476159927535129493}
+  _checkDistance: 0.3
+  _groundLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+--- !u!114 &8896943995836258192
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5675074895673688394}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54567d34911b115428f7579c703b540f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <MovementProfile>k__BackingField: {fileID: 11400000, guid: df501f85e39040c4b8292a4d16a0ae0a, type: 2}
+--- !u!114 &8771428737519958070
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5675074895673688394}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7dda66d98f1aa24c8fa4e993aae6212, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &3628947397788478182
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -269,8 +268,10 @@ MonoBehaviour:
   pickupRange: 3
   holdPoint: {fileID: 930280998916638394}
   throwForce: 10
-  holdOffset: {x: 0.3, y: -0.3, z: 1}
---- !u!114 &8771428737519958070
+  holdOffset: {x: 0.5, y: -0.5, z: 2}
+  audioSource: {fileID: 7923314494458330996}
+  spawnCooldown: 1
+--- !u!114 &8857824793741429987
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -279,10 +280,29 @@ MonoBehaviour:
   m_GameObject: {fileID: 5675074895673688394}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a7dda66d98f1aa24c8fa4e993aae6212, type: 3}
+  m_Script: {fileID: 11500000, guid: 89001a551b406e542bd801b667d2ed17, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &7957575375373463061
+  head:
+    LimbName: Head
+    MaxHealth: 100
+    CurrentHealth: 100
+  body:
+    LimbName: Body
+    MaxHealth: 100
+    CurrentHealth: 100
+  arms:
+    LimbName: Arms
+    MaxHealth: 100
+    CurrentHealth: 100
+  legs:
+    LimbName: Legs
+    MaxHealth: 100
+    CurrentHealth: 100
+  isPlayer: 1
+  debuffHandler: {fileID: 5747405295132617269}
+  flashAnimator: {fileID: 0}
+--- !u!114 &5747405295132617269
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -291,10 +311,47 @@ MonoBehaviour:
   m_GameObject: {fileID: 5675074895673688394}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c208f22250d9b5442b443fcc52fc1961, type: 3}
+  m_Script: {fileID: 11500000, guid: a725f412eeb03fb4b97d8612eb967b1a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fleshCubePrefab: {fileID: 3326070066375413175, guid: 1309e81558e2e8f4698b735e8ec25e80, type: 3}
+  legCriticalThreshold: 0.3
+  slowMultiplier: 0.5
+  armCriticalThreshold: 0.3
+  recoilMultiplier: 1.5
+  headCriticalThreshold: 0.3
+  blurOverlay: {fileID: 0}
+--- !u!114 &228927527542658957
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5675074895673688394}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6da71326692c5c34290de0f4e00b93c4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  weaponSlots:
+  - name: FleshCube
+    weaponPrefab: {fileID: 3326070066375413175, guid: 1309e81558e2e8f4698b735e8ec25e80, type: 3}
+    limbCost: 1
+    healthCost: 10
+  - name: FleshArm
+    weaponPrefab: {fileID: 3326070066375413175, guid: 0f5c688f7651de742a68fd729a1a1a06, type: 3}
+    limbCost: 2
+    healthCost: 20
+  - name: FleshLeg
+    weaponPrefab: {fileID: 3326070066375413175, guid: 31ceae603ec0eb24597e7969604c60f5, type: 3}
+    limbCost: 3
+    healthCost: 20
+  - name: FleshBrain
+    weaponPrefab: {fileID: 3326070066375413175, guid: a8970b8f39a3fc4428d44520aac3a622, type: 3}
+    limbCost: 0
+    healthCost: 30
+  weaponHoldPoint: {fileID: 930280998916638394}
+  holdManager: {fileID: 3628947397788478182}
+  limbHealth: {fileID: 8857824793741429987}
   audioSource: {fileID: 7923314494458330996}
   spawnCooldown: 1
 --- !u!1 &5977161666297634275

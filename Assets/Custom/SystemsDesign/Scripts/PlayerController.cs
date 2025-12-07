@@ -27,7 +27,7 @@ public class PlayerController : MonoBehaviour
     public int maxHealth = 100;
     public int currentHealth;
 
-    private FleshCube fleshCubeScript;
+    private ModularWeapon fleshCubeScript;
     private float cooldownTimer = 0f;
     public AudioSource audioSource;
     public CinemachineCamera cineCamera;
@@ -65,7 +65,7 @@ public class PlayerController : MonoBehaviour
     {
         if (heldObject != null)
         {
-            FleshCube gun = heldObject.GetComponent<FleshCube>();
+            ModularWeapon gun = heldObject.GetComponent<ModularWeapon>();
             if (gun != null)
             {
                 gun.Shoot();

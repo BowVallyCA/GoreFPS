@@ -22,7 +22,7 @@ public class ShootingScript : MonoBehaviour
             return;
         }
 
-        FleshCube gun = held.GetComponent<FleshCube>();
+        ModularWeapon gun = held.GetComponent<ModularWeapon>();
         VisualEffect vfx = held.GetComponentInChildren<VisualEffect>();
 
         if (gun != null)

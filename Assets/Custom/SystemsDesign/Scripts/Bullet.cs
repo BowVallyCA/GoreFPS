@@ -2,20 +2,40 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
-    [SerializeField] private float timerMax = 5f;
+    [Header("Bullet Settings")]
+    [SerializeField] private float speed = 50f;
+    [SerializeField] private float lifetime = 5f;
+    [SerializeField] private float impactForce = 10f;
+    [SerializeField] private int damage = 10;
 
-    private float timerCurrent;
+    [Header("Collision Filtering")]
+    [Tooltip("If true, the bullet will only damage objects on the target layer.")]
+    [SerializeField] private bool useTargetLayer = false;
+    [SerializeField] private LayerMask targetLayer;
+
+    [Tooltip("If true, the bullet will only damage objects with these tags.")]
+    [SerializeField] private bool useTargetTags = false;
+    [SerializeField] private string[] targetTags;
+
+    private float timer;
+    private GameObject shooter; // To avoid hitting yourself
+
+    public void Initialize(GameObject shooter)
+    {
+        this.shooter = shooter;
+    }
 
     private void Awake()
     {
-        timerCurrent = timerMax;
+        timer = lifetime;
     }
 
     private void Update()
     {
-        timerCurrent -= Time.deltaTime;
+        transform.position += transform.forward * speed * Time.deltaTime;
 
-        if (timerCurrent <= 0)
+        timer -= Time.deltaTime;
+        if (timer <= 0f)
         {
             Destroy(gameObject);
         }
@@ -23,6 +43,51 @@ public class Bullet : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        Destroy(gameObject);
+        GameObject hitObject = collision.gameObject;
+
+        // 1. Prevent self-hit
+        if (shooter != null && hitObject == shooter)
+        {
+            return;
+        }
+
+        // 2. Layer filtering (optional)
+        if (useTargetLayer && (targetLayer.value & (1 << hitObject.layer)) == 0)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        // 3. Tag filtering (optional)
+        if (useTargetTags && !TagMatch(hitObject.tag))
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        // 4. Apply impact force if rigidbody exists
+        if (collision.rigidbody)
+        {
+            collision.rigidbody.AddForce(transform.forward * impactForce, ForceMode.Impulse);
+        }
+
+        // 5. Deal damage (only if target has a health script)
+        var health = hitObject.GetComponent<LimbHealth>();
+        if (health != null)
+        {
+            //health.TakeDamage(damage, shooter);
+        }
+
+        //Destroy(gameObject);
+    }
+
+    private bool TagMatch(string tag)
+    {
+        for (int i = 0; i < targetTags.Length; i++)
+        {
+            if (tag == targetTags[i])
+                return true;
+        }
+        return false;
     }
 }

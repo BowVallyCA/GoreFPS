@@ -12,22 +12,16 @@ public class SpawnCubeScript : MonoBehaviour
 
     private float cooldownTimer;
     private HoldObjectScript holdManager;
-    private HealthScript health;
+    private LimbHealth health;
 
     void Start()
     {
         holdManager = GetComponent<HoldObjectScript>();
-        health = GetComponent<HealthScript>();
+        health = GetComponent<LimbHealth>();
 
         EventBus.Instance.Subscribe<InteractInputEvent>(this, HandleSpawn);
         EventBus.Instance.Subscribe<DodgeInputEvent>(this, HandleThrow);
     }
-
-    //void OnDestroy()
-    //{
-    //    EventBus.Instance.Unsubscribe<InteractInputEvent>(HandleSpawn);
-    //    EventBus.Instance.Unsubscribe<DodgeInputEvent>(HandleThrow);
-    //}
 
     void Update()
     {
@@ -45,10 +39,21 @@ public class SpawnCubeScript : MonoBehaviour
 
     void HandleSpawn(InteractInputEvent input)
     {
-        if (holdManager.GetHeldObject() == null && cooldownTimer <= 0f && health.currentHealth > 0)
+        // Player cannot spawn a cube if BODY health is zero
+        if (holdManager.GetHeldObject() == null &&
+            cooldownTimer <= 0f &&
+            health.body.CurrentHealth > 0)
         {
-            Instantiate(fleshCubePrefab, holdManager.holdPoint.position, holdManager.holdPoint.localRotation);
-            health.TakeDamage(10);
+            // Spawn cube
+            Instantiate(
+                fleshCubePrefab,
+                holdManager.holdPoint.position,
+                holdManager.holdPoint.localRotation
+            );
+
+            // Apply damage to a random limb
+            health.TakeDamageRandom(10);
+
             cooldownTimer = spawnCooldown;
 
             if (audioSource != null)
@@ -58,8 +63,11 @@ public class SpawnCubeScript : MonoBehaviour
         }
         else if (holdManager.GetHeldObject() != null)
         {
+            // Destroy cube and heal player body
             Destroy(holdManager.GetHeldObject().gameObject);
-            health.GainHealth(10);
+
+            health.HealLimb(LimbType.Body, 10);
+
             holdManager.ClearHeldObject();
         }
     }
