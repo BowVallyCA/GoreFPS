@@ -1,4 +1,5 @@
 {
+    "version": 1,
     "name": "PlayerInputActions",
     "maps": [
         {
@@ -63,7 +64,7 @@
                     "name": "Dodge",
                     "type": "Button",
                     "id": "b8c9d0e1-f2a3-4b4c-5d6e-7f8a9b0c1d2e",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -213,17 +214,6 @@
                 },
                 {
                     "name": "",
-                    "id": "d2e3f4a5-b6c7-4d8e-9f0a-1b2c3d4e5f6a",
-                    "path": "<Keyboard>/e",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Keyboard&Mouse",
-                    "action": "Interact",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "e3f4a5b6-c7d8-4e9f-0a1b-2c3d4e5f6a7b",
                     "path": "<Gamepad>/buttonWest",
                     "interactions": "",
@@ -236,7 +226,7 @@
                 {
                     "name": "",
                     "id": "5ad6b111-58e6-4b1f-b4c9-65d6c817cb34",
-                    "path": "<Keyboard>/q",
+                    "path": "<Mouse>/rightButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -280,7 +270,7 @@
                 {
                     "name": "",
                     "id": "5cf7aa91-52a1-4811-8f8c-239a34172c9b",
-                    "path": "<Mouse>/rightButton",
+                    "path": "<Keyboard>/e",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

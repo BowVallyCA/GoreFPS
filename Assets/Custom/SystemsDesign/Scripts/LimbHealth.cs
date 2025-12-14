@@ -1,10 +1,9 @@
 using System;
-using Unity.Burst.Intrinsics;
 using UnityEngine;
 
 public class LimbHealth : MonoBehaviour
 {
-    public static event System.Action<LimbType, int, int> OnLimbHealthChanged; // make sure this exists
+    public static event Action<LimbType, int, int> OnLimbHealthChanged;
 
     [Header("Limb Health Settings")]
     public LimbData head = new LimbData("Head", 50);
@@ -19,6 +18,14 @@ public class LimbHealth : MonoBehaviour
     [Header("Optional Damage Flash")]
     [SerializeField] private Animator flashAnimator;
 
+    [Header("Near Death Settings")]
+    public float deathCountdownTime = 5f;
+    private float deathTimer = 0f;
+    private bool isInNearDeath = false;
+    private LimbType fatalLimb;
+
+    private UiManager uiManager;
+
     private void Start()
     {
         head.Reset();
@@ -26,18 +33,14 @@ public class LimbHealth : MonoBehaviour
         arms.Reset();
         legs.Reset();
 
-        // Fire initial events so UI updates correctly
-        //OnLimbHealthChanged?.Invoke(LimbType.Head, head.CurrentHealth, head.MaxHealth);
-        //OnLimbHealthChanged?.Invoke(LimbType.Body, body.CurrentHealth, body.MaxHealth);
-        //OnLimbHealthChanged?.Invoke(LimbType.Arms, arms.CurrentHealth, arms.MaxHealth);
-        //OnLimbHealthChanged?.Invoke(LimbType.Legs, legs.CurrentHealth, legs.MaxHealth);
+        uiManager = FindAnyObjectByType<UiManager>();
 
         if (isPlayer && debuffHandler == null)
             Debug.LogWarning("Player has no debuff handler assigned.");
     }
 
     // ----------------------------------------------------------------------
-    // Damage Functions
+    // DAMAGE
     // ----------------------------------------------------------------------
 
     public void TakeDamageRandom(int amount)
@@ -51,24 +54,15 @@ public class LimbHealth : MonoBehaviour
         ApplyDamageToLimb(limb, amount);
     }
 
-    public void HealLimb(LimbType limb, int amount)
+    public void DamageSpecificLimb(LimbType limb, int amount)
     {
-        LimbData target = GetLimb(limb);
-        if (target == null) return;
-
-        target.CurrentHealth = Mathf.Clamp(target.CurrentHealth + amount, 0, target.MaxHealth);
-        OnLimbHealthChanged?.Invoke(limb, target.CurrentHealth, target.MaxHealth);
-
-        if (isPlayer)
-            debuffHandler?.EvaluateDebuffs(this);
+        ApplyDamageToLimb(limb, amount);
     }
 
     private void ApplyDamageToLimb(LimbType limb, int amount)
     {
         LimbData target = GetLimb(limb);
-
-        target.CurrentHealth -= amount;
-        target.CurrentHealth = Mathf.Max(target.CurrentHealth, 0);
+        target.CurrentHealth = Mathf.Max(target.CurrentHealth - amount, 0);
 
         OnLimbHealthChanged?.Invoke(limb, target.CurrentHealth, target.MaxHealth);
 
@@ -78,40 +72,81 @@ public class LimbHealth : MonoBehaviour
         if (isPlayer)
             debuffHandler?.EvaluateDebuffs(this);
 
-        if (IsDead())
-            Die();
+        // Check for limb death
+        if (!isInNearDeath && target.CurrentHealth <= 0)
+        {
+            EnterNearDeathState(limb);
+        }
     }
 
-    public void DamageSpecificLimb(LimbType limb, int amount)
+    // ----------------------------------------------------------------------
+    // HEALING
+    // ----------------------------------------------------------------------
+
+    public void HealLimb(LimbType limb, int amount)
     {
         LimbData target = GetLimb(limb);
         if (target == null) return;
 
-        target.CurrentHealth -= amount;
-        target.CurrentHealth = Mathf.Clamp(target.CurrentHealth, 0, target.MaxHealth);
+        bool wasDeadLimb = (target.CurrentHealth <= 0);
 
-        // notify UI and other listeners
+        target.CurrentHealth = Mathf.Clamp(target.CurrentHealth + amount, 0, target.MaxHealth);
         OnLimbHealthChanged?.Invoke(limb, target.CurrentHealth, target.MaxHealth);
 
-        // Re-evaluate player debuffs if you have a debuff handler
         if (isPlayer)
             debuffHandler?.EvaluateDebuffs(this);
 
-        if (IsDead())
-            Die();
+        // Escape near-death
+        if (isInNearDeath && limb == fatalLimb && target.CurrentHealth > 0)
+        {
+            ExitNearDeathState();
+        }
     }
 
     // ----------------------------------------------------------------------
+    // NEAR-DEATH HANDLING
+    // ----------------------------------------------------------------------
 
-    private bool IsDead()
+    private void EnterNearDeathState(LimbType limb)
     {
-        return head.CurrentHealth <= 0 || body.CurrentHealth <= 0;
+        isInNearDeath = true;
+        fatalLimb = limb;
+        deathTimer = deathCountdownTime;
+
+        uiManager?.BeginDeathCountdown(deathTimer);
+
+        Debug.Log($"Player entered near-death due to {limb}!");
+    }
+
+    private void ExitNearDeathState()
+    {
+        isInNearDeath = false;
+        uiManager?.CancelDeathCountdown();
+        Debug.Log("Player recovered from near-death!");
+    }
+
+    private void Update()
+    {
+        if (!isInNearDeath) return;
+
+        deathTimer -= Time.deltaTime;
+
+        uiManager?.UpdateDeathTimer(deathTimer);
+
+        if (deathTimer <= 0f)
+        {
+            isInNearDeath = false;
+            Die();
+        }
     }
 
     protected virtual void Die()
     {
         Debug.Log($"{gameObject.name} has died.");
+        uiManager?.ShowLoseScreen();
     }
+
+    // ----------------------------------------------------------------------
 
     private LimbType GetRandomLimb()
     {
@@ -140,19 +175,12 @@ public class LimbHealth : MonoBehaviour
 
     public float GetTotalHealthPercent()
     {
-        float sum = head.CurrentHealth +
-                    body.CurrentHealth +
-                    arms.CurrentHealth +
-                    legs.CurrentHealth;
-
-        float max = head.MaxHealth +
-                    body.MaxHealth +
-                    arms.MaxHealth +
-                    legs.MaxHealth;
-
+        float sum = head.CurrentHealth + body.CurrentHealth + arms.CurrentHealth + legs.CurrentHealth;
+        float max = head.MaxHealth + body.MaxHealth + arms.MaxHealth + legs.MaxHealth;
         return sum / max;
     }
 }
+
 
 // ----------------------------------------------------------------------
 

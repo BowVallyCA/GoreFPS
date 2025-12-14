@@ -1,3 +1,4 @@
+﻿using _Project.Code.Gameplay.PlayerControllers.Base;
 using UnityEngine;
 
 public class PlayerDebuffHandler : MonoBehaviour
@@ -16,20 +17,16 @@ public class PlayerDebuffHandler : MonoBehaviour
 
     private LimbHealth limbHealth;
 
-    // Optional references (assign if you want these debuffs to actually do something)
-    //private PlayerMovement movement;
-    //private PlayerGunController gun;
+    // The movement script that controls speed for CharacterController movement
+    private CharacterControllerMotor motor;
 
     private void Start()
     {
         limbHealth = GetComponent<LimbHealth>();
-        //movement = GetComponent<PlayerMovement>();
-        //gun = GetComponent<PlayerGunController>();
+        motor = GetComponent<CharacterControllerMotor>();
 
-        // If LimbHealth supports event callbacks, hook into it
         LimbHealth.OnLimbHealthChanged += OnLimbHealthChanged;
 
-        // Initialize with correct debuffs
         if (limbHealth != null)
             EvaluateDebuffs(limbHealth);
     }
@@ -52,26 +49,35 @@ public class PlayerDebuffHandler : MonoBehaviour
         HandleHeadDebuff(limbs);
     }
 
+    // ---------------------------------------------------------
+    // LEG DEBUFF — APPLIES SPEED MULTIPLIER TO CHARACTERCONTROLLER MOVEMENT
+    // ---------------------------------------------------------
     private void HandleLegDebuff(LimbHealth limbs)
     {
         bool low = limbs.legs.HealthPercent < legCriticalThreshold;
 
-        //if (movement != null)
-        //{
-        //    movement.speedMultiplier = low ? legSlowMultiplier : 1f;
-        //}
+        if (motor != null)
+        {
+            motor.speedMultiplier = low ? legSlowMultiplier : 1f;
+        }
     }
 
+    // ---------------------------------------------------------
+    // ARM DEBUFF — APPLIES RECOIL MULTIPLIER
+    // ---------------------------------------------------------
     private void HandleArmDebuff(LimbHealth limbs)
     {
         bool low = limbs.arms.HealthPercent < armCriticalThreshold;
 
-        //if (gun != null)
+        //if (movement != null)
         //{
-        //    gun.recoilMultiplier = low ? armRecoilMultiplier : 1f;
+        //    movement.recoilMultiplier = low ? armRecoilMultiplier : 1f;
         //}
     }
 
+    // ---------------------------------------------------------
+    // HEAD DEBUFF — BLUR / SCREEN EFFECT
+    // ---------------------------------------------------------
     private void HandleHeadDebuff(LimbHealth limbs)
     {
         bool low = limbs.head.HealthPercent < headCriticalThreshold;

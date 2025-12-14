@@ -19,6 +19,7 @@ public class WeaponSpawner : MonoBehaviour
     public HoldObjectScript holdManager;
     public LimbHealth limbHealth;
     public AudioSource audioSource;
+    public Animator firePointAnimator;    // plays animation when weapon is spawned
 
     [Header("Spawn")]
     public float spawnCooldown = 0.7f;
@@ -55,43 +56,48 @@ public class WeaponSpawner : MonoBehaviour
         WeaponSlot slot = weaponSlots[index];
         if (slot == null || slot.weaponPrefab == null) return;
 
-        // If holding a weapon -> destroy & refund
-        if (holdManager.GetHeldObject() != null)
-        {
-            RefundHealthFromHeldWeapon();
-            Destroy(holdManager.GetHeldObject().gameObject);
-            holdManager.ClearHeldObject();
-            currentWeapon = null;
-        }
+        // -----------------------
+        // Drop current weapon
+        // -----------------------
+        Rigidbody currentlyHeld = holdManager.GetHeldObject();
+        if (currentlyHeld != null)
+            holdManager.ThrowObject();
 
-        // Spawn weapon into world (not parented)
+        // -----------------------
+        // Spawn new weapon
+        // -----------------------
         GameObject spawned = Instantiate(
             slot.weaponPrefab,
             weaponHoldPoint.position,
             weaponHoldPoint.rotation
         );
 
-        // Store metadata for refund later
+        // Add metadata to refund later
         WeaponOrigin origin = spawned.AddComponent<WeaponOrigin>();
         origin.spawnedFromLimb = slot.limbCost;
         origin.healthCost = slot.healthCost;
 
-        // Apply damage cost to the chosen limb
+        // Apply limb cost
         limbHealth.DamageSpecificLimb(slot.limbCost, slot.healthCost);
 
-        // Equip weapon
-        Rigidbody rb = spawned.GetComponent<Rigidbody>();
-        if (rb != null)
-            //holdManager.ForceHold(rb);
+        // -----------------------
+        // Equip the new weapon
+        // -----------------------
+        holdManager.EquipWeapon(spawned);
 
         currentWeapon = spawned;
         cooldownTimer = spawnCooldown;
 
+        // -----------------------
         // FX
+        // -----------------------
         if (audioSource != null)
             audioSource.Play();
 
         CameraShakeManager.Shake();
+
+        if (firePointAnimator != null)
+            firePointAnimator.SetTrigger("Spawn");
     }
 
     private void RefundHealthFromHeldWeapon()
@@ -101,9 +107,6 @@ public class WeaponSpawner : MonoBehaviour
 
         WeaponOrigin origin = held.GetComponent<WeaponOrigin>();
         if (origin == null) return;
-
-        // DEBUG — see what cost is detected
-        Debug.Log($"[REFUND] Limb: {origin.spawnedFromLimb}, Refund: {origin.healthCost}");
 
         limbHealth.HealLimb(origin.spawnedFromLimb, origin.healthCost);
     }

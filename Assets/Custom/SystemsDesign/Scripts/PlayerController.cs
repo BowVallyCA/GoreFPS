@@ -47,6 +47,8 @@ public class PlayerController : MonoBehaviour
         EventBus.Instance.Subscribe<AttackInputEvent>(this, HandleFire);
         EventBus.Instance.Subscribe<InteractInputEvent>(this, HandleSpawn);
 
+        //Cursor.lockState = CursorLockMode.Locked;
+        //Cursor.visible = false;
     }
 
     void HandleThrow(DodgeInputEvent dodgeInput)
@@ -121,7 +123,9 @@ public class PlayerController : MonoBehaviour
     {
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         RaycastHit hit;
-
+        ///
+        /// Set your objects to be on a certain layer. That will fix the pick up glitchiness; you are intersecting things that are not those body parts. Body Part layer
+        ////
         if (Physics.Raycast(ray, out hit, pickupRange))
         {
             if (hit.collider.CompareTag(pickableTag))

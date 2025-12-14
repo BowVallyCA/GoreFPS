@@ -70,6 +70,9 @@ public class UiManager : MonoBehaviour
         }
 
         InitializeLimbSliders();
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     private void Update()
@@ -179,6 +182,51 @@ public class UiManager : MonoBehaviour
 
             pulseCoroutine = StartCoroutine(DyingPulse(0.08f, 1.12f, 0.9f));
         }
+    }
+
+    // ==========================================================
+    // NEAR-DEATH COUNTDOWN (called by LimbHealth)
+    // ==========================================================
+
+    public void BeginDeathCountdown(float time)
+    {
+        countdownValue = time;
+        isDying = true;
+
+        countdownText.gameObject.SetActive(true);
+        nearDeathText.gameObject.SetActive(true);
+    }
+
+    public void UpdateDeathTimer(float remaining)
+    {
+        if (!isDying) return;
+
+        countdownValue = remaining;
+        countdownText.text = countdownValue.ToString("F1");
+
+        if (countdownValue <= 0f)
+        {
+            ShowLoseScreen();
+        }
+    }
+
+    public void CancelDeathCountdown()
+    {
+        isDying = false;
+
+        countdownText.gameObject.SetActive(false);
+        nearDeathText.gameObject.SetActive(false);
+
+        countdownValue = countdownValueMax;
+    }
+
+    public void ShowLoseScreen()
+    {
+        loseScreen.gameObject.SetActive(true);
+        countdownText.gameObject.SetActive(false);
+        nearDeathText.gameObject.SetActive(false);
+
+        Time.timeScale = 0f;
     }
 
     // ----------------------------------------------------------------------

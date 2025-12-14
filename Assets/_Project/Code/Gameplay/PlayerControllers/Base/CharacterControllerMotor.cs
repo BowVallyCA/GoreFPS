@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using _Project.Code.Gameplay.Input;
 using _Project.Code.Core.ServiceLocator;
 
@@ -12,6 +12,10 @@ namespace _Project.Code.Gameplay.PlayerControllers.Base
 
         public Vector3 Velocity => _velocity;
 
+        // 🔥 Added for limb debuffs
+        [HideInInspector]
+        public float speedMultiplier = 1f;
+
         private void Awake()
         {
             _controller = GetComponent<CharacterController>();
@@ -19,11 +23,14 @@ namespace _Project.Code.Gameplay.PlayerControllers.Base
 
         public void Move(Vector3 direction, float speed)
         {
-            Vector3 moveVector = direction.normalized * speed * Time.deltaTime;
+            // 🔥 Apply debuff multiplier
+            float finalSpeed = speed * speedMultiplier;
+
+            Vector3 moveVector = direction.normalized * finalSpeed * Time.deltaTime;
             _controller.Move(moveVector);
 
-            _velocity.x = direction.normalized.x * speed;
-            _velocity.z = direction.normalized.z * speed;
+            _velocity.x = direction.normalized.x * finalSpeed;
+            _velocity.z = direction.normalized.z * finalSpeed;
         }
 
         public void ApplyGravity(float gravity)
