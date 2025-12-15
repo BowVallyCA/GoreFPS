@@ -148,6 +148,7 @@ MonoBehaviour:
   pelletCount: 6
   pelletSpreadAngle: 8
   showExplosionDebug: 1
+  outlineMaterial: {fileID: 2100000, guid: 0f78a81e47f4f364b98fd2880c54f889, type: 2}
 --- !u!82 &7877113729132914301
 AudioSource:
   m_ObjectHideFlags: 0
