@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b22eb2e601c2b374a87d4ace42995f9c, type: 3}
   m_Name: HeadBobEffect
   m_EditorClassIdentifier: 
-  <BobCyclesPerSecond>k__BackingField: 2.16
+  <BobCyclesPerSecond>k__BackingField: 1
   <VerticalBobDistance>k__BackingField: 0.2
   <HorizontalBobDistance>k__BackingField: 0.1
   <MinSpeedThreshold>k__BackingField: 0.5

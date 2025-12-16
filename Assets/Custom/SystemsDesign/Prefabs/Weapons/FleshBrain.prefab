@@ -66,7 +66,7 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: e5dac98bf1c9cf344aa8400e69d77bd2, type: 2}
-  - {fileID: 2100000, guid: e5dac98bf1c9cf344aa8400e69d77bd2, type: 2}
+  - {fileID: 2100000, guid: 0f78a81e47f4f364b98fd2880c54f889, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -252,7 +252,6 @@ MonoBehaviour:
   pelletCount: 6
   pelletSpreadAngle: 8
   showExplosionDebug: 1
-  outlineMaterial: {fileID: 2100000, guid: 0f78a81e47f4f364b98fd2880c54f889, type: 2}
 --- !u!82 &7877113729132914301
 AudioSource:
   m_ObjectHideFlags: 0

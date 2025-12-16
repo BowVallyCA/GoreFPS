@@ -47,7 +47,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: 404fcb69ac7f23e47b41e6bd875a28e2, type: 3}
+        m_Texture: {fileID: 2800000, guid: 26c2ccb327996d54bb61cfd7a83f6c03, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -123,7 +123,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _DoubleSidedConstants: {r: 1, g: 1, b: -1, a: 0}
-    - _EffectColor: {r: 0.710393, g: 0, b: 1, a: 0}
+    - _EffectColor: {r: 1, g: 0, b: 0, a: 0}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
