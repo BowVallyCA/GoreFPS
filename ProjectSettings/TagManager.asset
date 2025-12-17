@@ -6,6 +6,7 @@ TagManager:
   tags:
   - FleshCube
   - Bullet
+  - Enemy
   layers:
   - Default
   - TransparentFX

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class WeaponSpawner : MonoBehaviour
 {
@@ -13,66 +13,62 @@ public class WeaponSpawner : MonoBehaviour
 
     [Header("Weapon Settings")]
     public WeaponSlot[] weaponSlots = new WeaponSlot[4];
+
+    [Tooltip("Used only for player-held weapons")]
     public Transform weaponHoldPoint;
 
     [Header("References")]
-    public HoldObjectScript holdManager;
+    public HoldObjectScript holdManager;   // Player-only
     public LimbHealth limbHealth;
     public AudioSource audioSource;
-    public Animator firePointAnimator;    // plays animation when weapon is spawned
+    public Animator firePointAnimator;
 
-    [Header("Spawn")]
+    [Header("Spawn (Player Only)")]
     public float spawnCooldown = 0.7f;
-    private float cooldownTimer = 0f;
+    private float cooldownTimer;
 
-    private GameObject currentWeapon;
-
-    void Start()
+    private void Start()
     {
-        if (holdManager == null)
-            holdManager = GetComponent<HoldObjectScript>();
-
         if (limbHealth == null)
             limbHealth = GetComponent<LimbHealth>();
     }
 
-    void Update()
+    private void Update()
     {
         if (cooldownTimer > 0f)
             cooldownTimer -= Time.deltaTime;
 
-        if (Input.GetKeyDown(KeyCode.Alpha1)) SpawnWeaponAtIndex(0);
-        if (Input.GetKeyDown(KeyCode.Alpha2)) SpawnWeaponAtIndex(1);
-        if (Input.GetKeyDown(KeyCode.Alpha3)) SpawnWeaponAtIndex(2);
-        if (Input.GetKeyDown(KeyCode.Alpha4)) SpawnWeaponAtIndex(3);
+        // Manual spawning is PLAYER ONLY
+        if (!limbHealth || !limbHealth.isPlayer) return;
+
+        if (Input.GetKeyDown(KeyCode.Alpha1)) SpawnWeaponHeld(0);
+        if (Input.GetKeyDown(KeyCode.Alpha2)) SpawnWeaponHeld(1);
+        if (Input.GetKeyDown(KeyCode.Alpha3)) SpawnWeaponHeld(2);
+        if (Input.GetKeyDown(KeyCode.Alpha4)) SpawnWeaponHeld(3);
     }
 
-    private void SpawnWeaponAtIndex(int index)
+    // =========================================================
+    // PLAYER: SPAWN + EQUIP WEAPON
+    // =========================================================
+    private void SpawnWeaponHeld(int index)
     {
         if (index < 0 || index >= weaponSlots.Length) return;
         if (cooldownTimer > 0f) return;
-        if (limbHealth.body.CurrentHealth <= 0) return;
 
         WeaponSlot slot = weaponSlots[index];
         if (slot == null || slot.weaponPrefab == null) return;
 
-        // -----------------------
-        // Drop current weapon
-        // -----------------------
-        Rigidbody currentlyHeld = holdManager.GetHeldObject();
-        if (currentlyHeld != null)
+        // Drop currently held weapon
+        if (holdManager != null && holdManager.GetHeldObject() != null)
             holdManager.ThrowObject();
 
-        // -----------------------
-        // Spawn new weapon
-        // -----------------------
         GameObject spawned = Instantiate(
             slot.weaponPrefab,
             weaponHoldPoint.position,
             weaponHoldPoint.rotation
         );
 
-        // Add metadata to refund later
+        // Metadata
         WeaponOrigin origin = spawned.AddComponent<WeaponOrigin>();
         origin.spawnedFromLimb = slot.limbCost;
         origin.healthCost = slot.healthCost;
@@ -80,34 +76,53 @@ public class WeaponSpawner : MonoBehaviour
         // Apply limb cost
         limbHealth.DamageSpecificLimb(slot.limbCost, slot.healthCost);
 
-        // -----------------------
-        // Equip the new weapon
-        // -----------------------
-        holdManager.EquipWeapon(spawned);
+        // Equip
+        holdManager?.EquipWeapon(spawned);
 
-        currentWeapon = spawned;
         cooldownTimer = spawnCooldown;
 
-        // -----------------------
-        // FX
-        // -----------------------
-        if (audioSource != null)
-            audioSource.Play();
-
+        audioSource?.Play();
         CameraShakeManager.Shake();
-
-        if (firePointAnimator != null)
-            firePointAnimator.SetTrigger("Spawn");
+        firePointAnimator?.SetTrigger("Spawn");
     }
 
-    private void RefundHealthFromHeldWeapon()
+    // =========================================================
+    // 🔥 SHARED: DROP WEAPON TO GROUND (PLAYER + ENEMY)
+    // CALLED BY LimbHealth WHEN DAMAGED
+    // =========================================================
+    public void SpawnLimbWeaponToGround(LimbType limb)
     {
-        Rigidbody held = holdManager.GetHeldObject();
-        if (held == null) return;
+        WeaponSlot slot = GetSlotForLimb(limb);
+        if (slot == null || slot.weaponPrefab == null) return;
 
-        WeaponOrigin origin = held.GetComponent<WeaponOrigin>();
-        if (origin == null) return;
+        Vector3 spawnPos = transform.position + Vector3.up * 0.4f;
 
-        limbHealth.HealLimb(origin.spawnedFromLimb, origin.healthCost);
+        GameObject spawned = Instantiate(
+            slot.weaponPrefab,
+            spawnPos,
+            Quaternion.identity
+        );
+
+        WeaponOrigin origin = spawned.AddComponent<WeaponOrigin>();
+        origin.spawnedFromLimb = limb;
+        origin.healthCost = slot.healthCost;
+
+        if (!spawned.TryGetComponent<Rigidbody>(out _))
+            spawned.AddComponent<Rigidbody>();
+    }
+
+
+    // =========================================================
+    // INTERNAL
+    // =========================================================
+    private WeaponSlot GetSlotForLimb(LimbType limb)
+    {
+        for (int i = 0; i < weaponSlots.Length; i++)
+        {
+            if (weaponSlots[i].limbCost == limb)
+                return weaponSlots[i];
+        }
+        return null;
     }
 }
+

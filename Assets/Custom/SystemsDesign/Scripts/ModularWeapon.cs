@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using _Project.Code.Core.Events;
 using _Project.Code.Gameplay.Input;
 
@@ -10,49 +10,60 @@ public class ModularWeapon : MonoBehaviour
     }
 
     // --------------------------------------------------------------------------
-    //  GENERAL WEAPON SETTINGS
+    //  GENERAL
     // --------------------------------------------------------------------------
     [Header("General Settings")]
     public string weaponName = "Flesh Cube Weapon";
     public AudioSource audioSource;
 
+    // --------------------------------------------------------------------------
+    //  PROJECTILES
+    // --------------------------------------------------------------------------
     [Header("Projectile Settings")]
     public GameObject bulletPrefab;
     public Transform firePoint;
     public float bulletSpeed = 20f;
     public float bulletLifetime = 5f;
 
+    // --------------------------------------------------------------------------
+    //  AMMO
+    // --------------------------------------------------------------------------
     [Header("Ammo Settings")]
     public int maxAmmo = 6;
     public int currentAmmo;
 
     // --------------------------------------------------------------------------
-    //  OPTIONAL: SIZE SHRINKING BASED ON AMMO
+    //  SIZE SHRINK
     // --------------------------------------------------------------------------
-    [Header("Size Shrink Settings (Optional)")]
+    [Header("Size Shrink Settings")]
     public bool enableShrink = true;
-
     public Vector3 minScale = new Vector3(0.2f, 0.2f, 0.2f);
     private Vector3 initialScale;
 
     // --------------------------------------------------------------------------
-    //  OPTIONAL: EXPLOSION MODE
+    //  EXPLOSION MODE
     // --------------------------------------------------------------------------
-    [Header("Explosion Settings (Optional)")]
+    [Header("Explosion Settings")]
     public bool enableExplosion = false;
-
     public float explosionRadius = 5f;
     public float explosionForce = 700f;
     public GameObject explosionEffect;
-    public string targetTag = "Enemy";
 
     // --------------------------------------------------------------------------
-    //  OPTIONAL: SHOTGUN MODE
+    //  SHOTGUN MODE
     // --------------------------------------------------------------------------
-    [Header("Shotgun Settings (Optional)")]
+    [Header("Shotgun Settings")]
     public bool enableShotgun = false;
     public int pelletCount = 6;
     public float pelletSpreadAngle = 8f;
+
+    // --------------------------------------------------------------------------
+    //  WALL SPAWN MODE (SHOT BY OTHER WEAPONS)
+    // --------------------------------------------------------------------------
+    [Header("Wall Spawn Settings (Shot Reaction)")]
+    public bool enableWallSpawn = false;
+    public GameObject wallPrefab;
+    public float wallLifetime = 10f;
 
     // --------------------------------------------------------------------------
     //  DEBUG
@@ -63,7 +74,7 @@ public class ModularWeapon : MonoBehaviour
     // --------------------------------------------------------------------------
     //  UNITY
     // --------------------------------------------------------------------------
-    void Start()
+    private void Start()
     {
         currentAmmo = maxAmmo;
         initialScale = transform.localScale;
@@ -74,24 +85,36 @@ public class ModularWeapon : MonoBehaviour
         EventBus.Instance?.Unsubscribe<AttackInputEvent>(this);
     }
 
+    // --------------------------------------------------------------------------
+    //  COLLISION — SHOT BY ANOTHER WEAPON
+    // --------------------------------------------------------------------------
     private void OnCollisionEnter(Collision collision)
     {
-        if (enableExplosion && collision.gameObject.CompareTag("Bullet"))
+        if (!collision.gameObject.CompareTag("Bullet"))
+            return;
+
+        // Explosion behavior
+        if (enableExplosion)
         {
             Explode();
+            return;
+        }
+
+        // Wall spawn behavior
+        if (enableWallSpawn)
+        {
+            SpawnWallAndDestroy();
+            return;
         }
     }
 
     // --------------------------------------------------------------------------
-    //  SHOOT FUNCTION (Supports: single shot OR shotgun)
+    //  SHOOT (PLAYER USE ONLY)
     // --------------------------------------------------------------------------
     public void Shoot()
     {
         if (bulletPrefab == null || firePoint == null)
-        {
-            Debug.LogWarning("Weapon missing bulletPrefab or firePoint!");
             return;
-        }
 
         if (currentAmmo <= 0)
         {
@@ -104,29 +127,27 @@ public class ModularWeapon : MonoBehaviour
         if (enableShrink)
             UpdateSize();
 
-        if (currentAmmo <= 0)
-            OnOutOfAmmo();
-
-        // Play sound
         audioSource?.Play();
 
-        // Fire shotgun or single shot:
         if (enableShotgun)
-        {
             ShootShotgun();
-        }
         else
-        {
             ShootSingle();
-        }
+
+        if (currentAmmo <= 0)
+            OnOutOfAmmo();
     }
 
     // --------------------------------------------------------------------------
-    //  SINGLE BULLET FIRE
+    //  SINGLE SHOT
     // --------------------------------------------------------------------------
     private void ShootSingle()
     {
-        GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+        GameObject bullet = Instantiate(
+            bulletPrefab,
+            firePoint.position,
+            firePoint.rotation
+        );
 
         Rigidbody rb = bullet.GetComponent<Rigidbody>();
         if (rb != null)
@@ -136,61 +157,95 @@ public class ModularWeapon : MonoBehaviour
     }
 
     // --------------------------------------------------------------------------
-    //  SHOTGUN FIRE MODE
+    //  SHOTGUN
     // --------------------------------------------------------------------------
     private void ShootShotgun()
     {
         for (int i = 0; i < pelletCount; i++)
         {
-            Quaternion randomSpread = firePoint.rotation *
+            Quaternion spread =
+                firePoint.rotation *
                 Quaternion.Euler(
                     Random.Range(-pelletSpreadAngle, pelletSpreadAngle),
                     Random.Range(-pelletSpreadAngle, pelletSpreadAngle),
-                    0);
+                    0f
+                );
 
-            GameObject pellet = Instantiate(bulletPrefab, firePoint.position, randomSpread);
+            GameObject pellet = Instantiate(
+                bulletPrefab,
+                firePoint.position,
+                spread
+            );
 
             Rigidbody rb = pellet.GetComponent<Rigidbody>();
             if (rb != null)
-                rb.linearVelocity = randomSpread * Vector3.forward * bulletSpeed;
+                rb.linearVelocity = spread * Vector3.forward * bulletSpeed;
 
             Destroy(pellet, bulletLifetime);
         }
     }
 
     // --------------------------------------------------------------------------
-    //  EXPLOSION LOGIC
+    //  WALL SPAWN (REACTION TO BEING SHOT)
     // --------------------------------------------------------------------------
-    public void Explode()
+    private void SpawnWallAndDestroy()
     {
-        if (!enableExplosion)
-            return;
-
         if (explosionEffect != null)
             Instantiate(explosionEffect, transform.position, Quaternion.identity);
 
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, explosionRadius);
-
-        foreach (Collider hit in hitColliders)
+        if (wallPrefab != null)
         {
-            Rigidbody rb = hit.GetComponent<Rigidbody>();
-            if (rb != null)
-                rb.AddExplosionForce(explosionForce, transform.position, explosionRadius, 1f, ForceMode.Impulse);
+            GameObject wall = Instantiate(
+                wallPrefab,
+                transform.position,
+                transform.rotation
+            );
+
+            if (wallLifetime > 0f)
+                Destroy(wall, wallLifetime);
         }
 
         Destroy(gameObject);
     }
 
     // --------------------------------------------------------------------------
-    //  SIZE SHRINKING BASED ON AMMO
+    //  EXPLOSION
+    // --------------------------------------------------------------------------
+    private void Explode()
+    {
+        if (explosionEffect != null)
+            Instantiate(explosionEffect, transform.position, Quaternion.identity);
+
+        Collider[] hits = Physics.OverlapSphere(transform.position, explosionRadius);
+
+        foreach (Collider hit in hits)
+        {
+            Rigidbody rb = hit.GetComponent<Rigidbody>();
+            if (rb != null)
+                rb.AddExplosionForce(
+                    explosionForce,
+                    transform.position,
+                    explosionRadius,
+                    1f,
+                    ForceMode.Impulse
+                );
+            LimbHealth lh = hit.GetComponent<LimbHealth>();
+            if(lh != null)
+            {
+                lh.TakeDamageRandom(50);
+            }
+        }
+
+        Destroy(gameObject);
+    }
+
+    // --------------------------------------------------------------------------
+    //  SIZE SHRINK
     // --------------------------------------------------------------------------
     private void UpdateSize()
     {
-        if (!enableShrink)
-            return;
-
-        float ammoRatio = (float)currentAmmo / maxAmmo;
-        transform.localScale = Vector3.Lerp(minScale, initialScale, ammoRatio);
+        float ratio = (float)currentAmmo / maxAmmo;
+        transform.localScale = Vector3.Lerp(minScale, initialScale, ratio);
     }
 
     // --------------------------------------------------------------------------
@@ -198,12 +253,11 @@ public class ModularWeapon : MonoBehaviour
     // --------------------------------------------------------------------------
     private void OnOutOfAmmo()
     {
-        Debug.Log($"{weaponName} is out of ammo and destroyed!");
         Destroy(gameObject);
     }
 
     // --------------------------------------------------------------------------
-    //  DEBUG DRAW
+    //  DEBUG
     // --------------------------------------------------------------------------
     private void OnDrawGizmosSelected()
     {

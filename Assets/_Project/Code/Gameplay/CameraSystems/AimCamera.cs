@@ -23,6 +23,11 @@ namespace _Project.Code.Gameplay.CameraSystems
         private float _currentPitch;
         private float _currentYaw;
 
+        // =========================
+        // DEBUFF SUPPORT
+        // =========================
+        private float _sensitivityMultiplier = 1f;
+
         protected override void Awake()
         {
             base.Awake();
@@ -124,13 +129,11 @@ namespace _Project.Code.Gameplay.CameraSystems
         {
             if (_profile == null) return;
 
-            // Since we're parented to the player's head, we need to:
-            // 1. Rotate the player for yaw (horizontal look)
-            // 2. Apply pitch locally to the camera
+            float sensX = _profile.LookSensitivityX * _sensitivityMultiplier;
+            float sensY = _profile.LookSensitivityY * _sensitivityMultiplier;
 
-            // Accumulate input
-            _currentYaw += evt.Input.x * _profile.LookSensitivityX;
-            _currentPitch -= evt.Input.y * _profile.LookSensitivityY;
+            _currentYaw += evt.Input.x * sensX;
+            _currentPitch -= evt.Input.y * sensY;
             _currentPitch = Mathf.Clamp(_currentPitch, _profile.MinPitch, _profile.MaxPitch);
         }
 
@@ -167,6 +170,15 @@ namespace _Project.Code.Gameplay.CameraSystems
             }
 
             base.LateUpdate();
+        }
+
+
+        // =====================================================
+        // PUBLIC API — DEBUFF HOOK
+        // =====================================================
+        public void SetSensitivityMultiplier(float multiplier)
+        {
+            _sensitivityMultiplier = Mathf.Clamp(multiplier, 0.1f, 1f);
         }
 
         public void SetOffset(Vector3 offset)

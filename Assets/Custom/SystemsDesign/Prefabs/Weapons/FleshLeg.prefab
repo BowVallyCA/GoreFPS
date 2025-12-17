@@ -147,6 +147,10 @@ MonoBehaviour:
   enableShotgun: 0
   pelletCount: 6
   pelletSpreadAngle: 8
+  enableWallSpawn: 1
+  wallPrefab: {fileID: 8565054153148250873, guid: 1ce44ebb2dba35146be516a1c6b46254, type: 3}
+  wallSpawnPoint: {fileID: 109822256405642187}
+  wallLifetime: 10
   showExplosionDebug: 1
 --- !u!82 &7877113729132914301
 AudioSource:

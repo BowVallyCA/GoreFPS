@@ -1,30 +1,37 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 public class LimbHealth : MonoBehaviour
 {
     public static event Action<LimbType, int, int> OnLimbHealthChanged;
 
-    [Header("Limb Health Settings")]
+    [Header("Limb Health")]
     public LimbData head = new LimbData("Head", 50);
     public LimbData body = new LimbData("Body", 100);
     public LimbData arms = new LimbData("Arms", 60);
     public LimbData legs = new LimbData("Legs", 60);
 
-    [Header("Player Settings")]
-    [SerializeField] private bool isPlayer = false;
-    [SerializeField] private PlayerDebuffHandler debuffHandler;
+    [Header("Type")]
+    [SerializeField] public bool isPlayer = false;
 
-    [Header("Optional Damage Flash")]
+    [Header("Player Only")]
+    [SerializeField] private PlayerDebuffHandler debuffHandler;
     [SerializeField] private Animator flashAnimator;
 
-    [Header("Near Death Settings")]
-    public float deathCountdownTime = 5f;
-    private float deathTimer = 0f;
-    private bool isInNearDeath = false;
-    private LimbType fatalLimb;
+    [Header("Weapon Drops")]
+    [SerializeField] private WeaponSpawner weaponSpawner;
+    [SerializeField] private Transform weaponDropPoint;
+
+    [SerializeField] private int randomDmgThreshold = 20;
+    private int randomDmgValue = 0;
 
     private UiManager uiManager;
+
+    // Near-death (player only)
+    public float deathCountdownTime = 5f;
+    private float deathTimer;
+    private bool isInNearDeath;
+    private LimbType fatalLimb;
 
     private void Start()
     {
@@ -33,25 +40,20 @@ public class LimbHealth : MonoBehaviour
         arms.Reset();
         legs.Reset();
 
-        uiManager = FindAnyObjectByType<UiManager>();
+        if (isPlayer)
+            uiManager = FindAnyObjectByType<UiManager>();
 
-        if (isPlayer && debuffHandler == null)
-            Debug.LogWarning("Player has no debuff handler assigned.");
+        if (weaponDropPoint == null)
+            weaponDropPoint = transform;
     }
 
-    // ----------------------------------------------------------------------
+    // ----------------------------------------------------
     // DAMAGE
-    // ----------------------------------------------------------------------
+    // ----------------------------------------------------
 
     public void TakeDamageRandom(int amount)
     {
-        LimbType randomLimb = GetRandomLimb();
-        ApplyDamageToLimb(randomLimb, amount);
-    }
-
-    public void TakeDamageToLimb(LimbType limb, int amount)
-    {
-        ApplyDamageToLimb(limb, amount);
+        ApplyDamageToLimbEnemyDMG(GetRandomLimb(), amount);
     }
 
     public void DamageSpecificLimb(LimbType limb, int amount)
@@ -62,91 +64,151 @@ public class LimbHealth : MonoBehaviour
     private void ApplyDamageToLimb(LimbType limb, int amount)
     {
         LimbData target = GetLimb(limb);
+        if (target == null) return;
+
         target.CurrentHealth = Mathf.Max(target.CurrentHealth - amount, 0);
 
-        OnLimbHealthChanged?.Invoke(limb, target.CurrentHealth, target.MaxHealth);
-
-        if (flashAnimator)
-            flashAnimator.CrossFade("RedFlash", 0f);
-
+        // Player UI ONLY
         if (isPlayer)
+        {
+            OnLimbHealthChanged?.Invoke(limb, target.CurrentHealth, target.MaxHealth);
             debuffHandler?.EvaluateDebuffs(this);
 
-        // Check for limb death
-        if (!isInNearDeath && target.CurrentHealth <= 0)
+            if (flashAnimator)
+                flashAnimator.CrossFade("RedFlash", 0f);
+        }
+
+        // Limb death handling
+        if (target.CurrentHealth <= 0)
         {
-            EnterNearDeathState(limb);
+            if (isPlayer)
+            {
+                EnterNearDeathState(limb);
+            }
+            else
+            {
+                Die(); // enemies die immediately
+            }
         }
     }
 
-    // ----------------------------------------------------------------------
-    // HEALING
-    // ----------------------------------------------------------------------
+    private void ApplyDamageToLimbEnemyDMG(LimbType limb, int amount)
+    {
+        LimbData target = GetLimb(limb);
+        if (target == null) return;
+
+        // ---------------------------------
+        // 1️⃣ ALWAYS APPLY DAMAGE
+        // ---------------------------------
+        target.CurrentHealth = Mathf.Max(target.CurrentHealth - amount, 0);
+
+        // ---------------------------------
+        // 2️⃣ ALWAYS UPDATE PLAYER UI / DEBUFFS
+        // ---------------------------------
+        if (isPlayer)
+        {
+            OnLimbHealthChanged?.Invoke(limb, target.CurrentHealth, target.MaxHealth);
+            debuffHandler?.EvaluateDebuffs(this);
+
+            if (flashAnimator)
+                flashAnimator.CrossFade("RedFlash", 0f);
+        }
+
+        // ---------------------------------
+        // 3️⃣ ACCUMULATE DAMAGE FOR DROP LOGIC
+        // ---------------------------------
+        randomDmgValue += amount;
+
+        if (weaponSpawner != null && randomDmgValue >= randomDmgThreshold)
+        {
+            weaponSpawner.SpawnLimbWeaponToGround(limb);
+            randomDmgValue = 0; // reset threshold
+        }
+
+        // ---------------------------------
+        // 4️⃣ LIMB DEATH HANDLING
+        // ---------------------------------
+        if (target.CurrentHealth <= 0)
+        {
+            if (isPlayer)
+            {
+                EnterNearDeathState(limb);
+            }
+            else
+            {
+                Die();
+            }
+        }
+    }
+
+    // ----------------------------------------------------
+    // HEALING (PLAYER ONLY)
+    // ----------------------------------------------------
 
     public void HealLimb(LimbType limb, int amount)
     {
         LimbData target = GetLimb(limb);
         if (target == null) return;
 
-        bool wasDeadLimb = (target.CurrentHealth <= 0);
-
-        target.CurrentHealth = Mathf.Clamp(target.CurrentHealth + amount, 0, target.MaxHealth);
-        OnLimbHealthChanged?.Invoke(limb, target.CurrentHealth, target.MaxHealth);
+        target.CurrentHealth = Mathf.Clamp(
+            target.CurrentHealth + amount,
+            0,
+            target.MaxHealth
+        );
 
         if (isPlayer)
+        {
+            OnLimbHealthChanged?.Invoke(limb, target.CurrentHealth, target.MaxHealth);
             debuffHandler?.EvaluateDebuffs(this);
 
-        // Escape near-death
-        if (isInNearDeath && limb == fatalLimb && target.CurrentHealth > 0)
-        {
-            ExitNearDeathState();
+            if (isInNearDeath && limb == fatalLimb && target.CurrentHealth > 0)
+                ExitNearDeathState();
         }
     }
 
-    // ----------------------------------------------------------------------
-    // NEAR-DEATH HANDLING
-    // ----------------------------------------------------------------------
+    // ----------------------------------------------------
+    // PLAYER NEAR DEATH
+    // ----------------------------------------------------
 
     private void EnterNearDeathState(LimbType limb)
     {
+        if (isInNearDeath) return;
+
         isInNearDeath = true;
         fatalLimb = limb;
         deathTimer = deathCountdownTime;
 
         uiManager?.BeginDeathCountdown(deathTimer);
-
-        Debug.Log($"Player entered near-death due to {limb}!");
     }
 
     private void ExitNearDeathState()
     {
         isInNearDeath = false;
         uiManager?.CancelDeathCountdown();
-        Debug.Log("Player recovered from near-death!");
     }
 
     private void Update()
     {
-        if (!isInNearDeath) return;
+        if (!isPlayer || !isInNearDeath) return;
 
         deathTimer -= Time.deltaTime;
-
         uiManager?.UpdateDeathTimer(deathTimer);
 
         if (deathTimer <= 0f)
-        {
-            isInNearDeath = false;
             Die();
-        }
     }
 
     protected virtual void Die()
     {
-        Debug.Log($"{gameObject.name} has died.");
-        uiManager?.ShowLoseScreen();
+        if (isPlayer)
+            uiManager?.ShowLoseScreen();
+
+        Destroy(gameObject);
     }
 
-    // ----------------------------------------------------------------------
+    // ----------------------------------------------------
+    // HELPERS
+    // ----------------------------------------------------
 
     private LimbType GetRandomLimb()
     {
@@ -173,13 +235,28 @@ public class LimbHealth : MonoBehaviour
         };
     }
 
+    // ⚠️ REQUIRED — DO NOT REMOVE
     public float GetTotalHealthPercent()
     {
-        float sum = head.CurrentHealth + body.CurrentHealth + arms.CurrentHealth + legs.CurrentHealth;
-        float max = head.MaxHealth + body.MaxHealth + arms.MaxHealth + legs.MaxHealth;
+        float sum =
+            head.CurrentHealth +
+            body.CurrentHealth +
+            arms.CurrentHealth +
+            legs.CurrentHealth;
+
+        float max =
+            head.MaxHealth +
+            body.MaxHealth +
+            arms.MaxHealth +
+            legs.MaxHealth;
+
         return sum / max;
     }
 }
+
+
+
+
 
 
 // ----------------------------------------------------------------------

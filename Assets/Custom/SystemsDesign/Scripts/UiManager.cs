@@ -72,7 +72,7 @@ public class UiManager : MonoBehaviour
         InitializeLimbSliders();
 
         Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        Cursor.visible = false;  
     }
 
     private void Update()

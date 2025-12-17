@@ -1,29 +1,40 @@
-﻿using _Project.Code.Gameplay.PlayerControllers.Base;
+﻿using _Project.Code.Gameplay.CameraSystems;
+using _Project.Code.Gameplay.PlayerControllers.Base;
 using UnityEngine;
 
 public class PlayerDebuffHandler : MonoBehaviour
 {
-    [Header("Movement Debuff (Legs)")]
+    [Header("Leg Debuff (Movement)")]
     public float legCriticalThreshold = 0.3f;
     public float legSlowMultiplier = 0.5f;
 
-    [Header("Aim Debuff (Arms)")]
+    [Header("Arm Debuff (Drop Weapon)")]
     public float armCriticalThreshold = 0.3f;
-    public float armRecoilMultiplier = 1.5f;
+    public AudioSource armDebuffAudio;
 
-    [Header("Vision Debuff (Head)")]
-    public float headCriticalThreshold = 0.3f;
-    public CanvasGroup blurOverlay;
+    [Header("Head Debuff (UI Fade)")]
+    [Tooltip("CanvasGroup controlling ALL player UI")]
+    public CanvasGroup uiCanvasGroup;
+    public float minUIAlpha = 0.25f;
+
+    [Header("Body Debuff (Look Sensitivity)")]
+    public float bodyCriticalThreshold = 0.3f;
+    public float bodySensitivityMultiplier = 0.5f; // used later with AimCamera
 
     private LimbHealth limbHealth;
-
-    // The movement script that controls speed for CharacterController movement
     private CharacterControllerMotor motor;
+    private HoldObjectScript holdObject;
+    private AimCamera aimCamera;
+
+    // State guards
+    private bool armDebuffTriggered = false;
 
     private void Start()
     {
         limbHealth = GetComponent<LimbHealth>();
         motor = GetComponent<CharacterControllerMotor>();
+        holdObject = GetComponent<HoldObjectScript>();
+        aimCamera = GetComponent<AimCamera>();
 
         LimbHealth.OnLimbHealthChanged += OnLimbHealthChanged;
 
@@ -42,49 +53,89 @@ public class PlayerDebuffHandler : MonoBehaviour
             EvaluateDebuffs(limbHealth);
     }
 
+    // =========================================================
+    // MASTER EVALUATION
+    // =========================================================
     public void EvaluateDebuffs(LimbHealth limbs)
     {
         HandleLegDebuff(limbs);
         HandleArmDebuff(limbs);
         HandleHeadDebuff(limbs);
+        HandleBodyDebuff(limbs);
     }
 
-    // ---------------------------------------------------------
-    // LEG DEBUFF — APPLIES SPEED MULTIPLIER TO CHARACTERCONTROLLER MOVEMENT
-    // ---------------------------------------------------------
+    // =========================================================
+    // LEG — MOVEMENT SLOW
+    // =========================================================
     private void HandleLegDebuff(LimbHealth limbs)
     {
         bool low = limbs.legs.HealthPercent < legCriticalThreshold;
 
         if (motor != null)
-        {
             motor.speedMultiplier = low ? legSlowMultiplier : 1f;
-        }
     }
 
-    // ---------------------------------------------------------
-    // ARM DEBUFF — APPLIES RECOIL MULTIPLIER
-    // ---------------------------------------------------------
+    // =========================================================
+    // ARM — FORCE DROP WEAPON + AUDIO
+    // =========================================================
     private void HandleArmDebuff(LimbHealth limbs)
     {
         bool low = limbs.arms.HealthPercent < armCriticalThreshold;
 
-        //if (movement != null)
-        //{
-        //    movement.recoilMultiplier = low ? armRecoilMultiplier : 1f;
-        //}
+        if (low && !armDebuffTriggered)
+        {
+            armDebuffTriggered = true;
+
+            // Force weapon drop
+            if (holdObject != null && holdObject.GetHeldObject() != null)
+                holdObject.ThrowObject();
+
+            // Audio feedback
+            if (armDebuffAudio != null)
+                armDebuffAudio.Play();
+        }
+        else if (!low)
+        {
+            armDebuffTriggered = false;
+        }
     }
 
-    // ---------------------------------------------------------
-    // HEAD DEBUFF — BLUR / SCREEN EFFECT
-    // ---------------------------------------------------------
+    // =========================================================
+    // HEAD — UI TRANSPARENCY BASED ON HEALTH
+    // =========================================================
     private void HandleHeadDebuff(LimbHealth limbs)
     {
-        bool low = limbs.head.HealthPercent < headCriticalThreshold;
+        if (uiCanvasGroup == null) return;
 
-        if (blurOverlay != null)
-        {
-            blurOverlay.alpha = low ? 1f : 0f;
-        }
+        float percent = Mathf.Clamp01(limbs.head.HealthPercent);
+
+        // Higher damage → more transparent UI
+        float alpha = Mathf.Lerp(minUIAlpha, 1f, percent);
+        uiCanvasGroup.alpha = alpha;
+    }
+
+    // =========================================================
+    // BODY — LOOK SENSITIVITY (HOOK ONLY)
+    // =========================================================
+    private void HandleBodyDebuff(LimbHealth limbs)
+    {
+        bool low = limbs.body.HealthPercent < bodyCriticalThreshold;
+
+        //aimCamera.SetSensitivityMultiplier(low ? bodySensitivityMultiplier : 1f);
+
+        /*
+         * This is intentionally a hook.
+         * When you're ready, AimCamera should expose something like:
+         *
+         *   SetSensitivityMultiplier(float value)
+         *
+         * Then you do:
+         *
+         * aimCamera.SetSensitivityMultiplier(
+         *     low ? bodySensitivityMultiplier : 1f
+         * );
+         *
+         * This avoids hard-coding camera internals here.
+         */
     }
 }

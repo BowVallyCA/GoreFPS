@@ -18,8 +18,11 @@ public class Bullet : MonoBehaviour
     [SerializeField] private string[] targetTags;
 
     private float timer;
-    private GameObject shooter; // To avoid hitting yourself
+    private GameObject shooter; // prevents self-hit
 
+    // ----------------------------------------------------
+    // INITIALIZATION
+    // ----------------------------------------------------
     public void Initialize(GameObject shooter)
     {
         this.shooter = shooter;
@@ -41,46 +44,60 @@ public class Bullet : MonoBehaviour
         }
     }
 
+    // ----------------------------------------------------
+    // COLLISION
+    // ----------------------------------------------------
     private void OnCollisionEnter(Collision collision)
     {
         GameObject hitObject = collision.gameObject;
 
         // 1. Prevent self-hit
         if (shooter != null && hitObject == shooter)
+            return;
+
+        if (hitObject.CompareTag("Bullet"))
         {
             return;
         }
 
-        // 2. Layer filtering (optional)
-        if (useTargetLayer && (targetLayer.value & (1 << hitObject.layer)) == 0)
+            // 2. Layer filtering
+            if (useTargetLayer && (targetLayer.value & (1 << hitObject.layer)) == 0)
         {
             Destroy(gameObject);
             return;
         }
 
-        // 3. Tag filtering (optional)
+        // 3. Tag filtering
         if (useTargetTags && !TagMatch(hitObject.tag))
         {
             Destroy(gameObject);
             return;
         }
 
-        // 4. Apply impact force if rigidbody exists
-        if (collision.rigidbody)
+        // 4. Apply physics force
+        if (collision.rigidbody != null)
         {
-            collision.rigidbody.AddForce(transform.forward * impactForce, ForceMode.Impulse);
+            collision.rigidbody.AddForce(
+                transform.forward * impactForce,
+                ForceMode.Impulse
+            );
         }
 
-        // 5. Deal damage (only if target has a health script)
-        var health = hitObject.GetComponent<LimbHealth>();
-        if (health != null)
+        // 5. Limb-based damage (random limb)
+        LimbHealth limbHealth = hitObject.GetComponentInParent<LimbHealth>();
+        if (limbHealth != null)
         {
-            //health.TakeDamage(damage, shooter);
+            limbHealth.TakeDamageRandom(damage);
+            Destroy(gameObject);
         }
 
-        //Destroy(gameObject);
+        // 6. Destroy bullet
+        Destroy(gameObject);
     }
 
+    // ----------------------------------------------------
+    // UTIL
+    // ----------------------------------------------------
     private bool TagMatch(string tag)
     {
         for (int i = 0; i < targetTags.Length; i++)
@@ -91,3 +108,4 @@ public class Bullet : MonoBehaviour
         return false;
     }
 }
+

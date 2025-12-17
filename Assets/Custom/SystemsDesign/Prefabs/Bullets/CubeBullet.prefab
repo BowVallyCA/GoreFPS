@@ -157,5 +157,6 @@ MonoBehaviour:
   targetLayer:
     serializedVersion: 2
     m_Bits: 0
-  useTargetTags: 0
-  targetTags: []
+  useTargetTags: 1
+  targetTags:
+  - Enemy

@@ -248,10 +248,12 @@ MonoBehaviour:
   explosionRadius: 5
   explosionForce: 25
   explosionEffect: {fileID: 4632479857384184363, guid: eaa4e82e3ffed1f40b841697edc93ee5, type: 3}
-  targetTag: FleshCube
   enableShotgun: 1
   pelletCount: 6
   pelletSpreadAngle: 8
+  enableWallSpawn: 0
+  wallPrefab: {fileID: 0}
+  wallLifetime: 10
   showExplosionDebug: 1
 --- !u!82 &7877113729132914301
 AudioSource:
